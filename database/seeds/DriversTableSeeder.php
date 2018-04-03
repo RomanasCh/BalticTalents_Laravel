@@ -11,6 +11,6 @@ class DriversTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(App\Models\Drivers::class, 200)->create();
+        factory(App\Models\Driver::class, 200)->create();
     }
 }

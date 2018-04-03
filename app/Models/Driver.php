@@ -5,28 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-
 /**
- * Class Radar.
+ * Class Driver.
  */
-class Radar extends Model
+class Driver extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'created_at',
-        'number',
-        'distance',
-        'time',
+        'name',
+        'city',
         'user_id'
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function driver()
+    public function radars()
     {
-        return $this->belongsTo(Driver::class);
+        return $this->hasMany(Radar::class);
     }
 
     /**
@@ -37,5 +34,6 @@ class Radar extends Model
         return $this->belongsTo(User::class);
     }
 
-}
 
+    public $timestamps = false;
+}

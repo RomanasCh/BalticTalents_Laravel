@@ -15,6 +15,7 @@ class AddColumnRadars extends Migration
     {
        Schema::table('radars', function (Blueprint $table) {
            $table->timestamp('deleted_at')->nullable();
+           $table->unsignedInteger('user_id')->nullable();
        });
     }
 
@@ -27,6 +28,7 @@ class AddColumnRadars extends Migration
     {
         Schema::table('radars', function (Blueprint $table) {
             $table->dropColumn('deleted_at');
+            $table->dropColumn('user_id');
         });
     }
 }

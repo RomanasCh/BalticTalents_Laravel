@@ -2,22 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Radar;
-use Illuminate\Http\Request;
+use App\Repositories\RadarRepository;
+use Illuminate\Support\Facades\Session;
 
 class RadarController extends Controller
 {
+
+    private $radarRepository;
+
     /**
-     * Display a listing of the resource.
+     * RadarController constructor.
      *
-     * @return \Illuminate\Http\Response
+     * @param RadarRepository $radarRepository
+     */
+    public function __construct(RadarRepository $radarRepository)
+    {
+        $this->radarRepository = $radarRepository;
+        $this->middleware('auth');
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
-        $radars = Radar::withTrashed()->paginate(15);
+        $trashView = false;
 
-        return view('radars.index',
-            compact('radars'));
+        if(Session::has('trashview')) {
+            $trashView = Session::get('trashview');
+        }
+
+        return view('radars.index', [
+            'radars' => $this->radarRepository->getRadars($trashView, 15)]);
     }
 
     /**
@@ -27,37 +43,29 @@ class RadarController extends Controller
      */
     public function create()
     {
+
         return view('radars.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function store(Request $request)
+    public function store()
     {
-        $radar = Radar::create([
-            'number'   => $request->get('number'),
-            'distance' => $request->get('distance'),
-            'time'     => $request->get('time')
-        ]);
 
+        $this->radarRepository->newRadar();
         return redirect(route('radars.index'));
     }
 
     /**
-     * Display the specified resource.
+     * @param $id
      *
-     * @param  int $id
-     *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\View\View
      */
     public function show($id)
     {
-        $radar = Radar::withTrashed()->find($id);
+
+        $radar = $this->radarRepository->showRadar($id);
 
         if (!$radar->trashed()) {
             return view('radars.show',
@@ -76,8 +84,7 @@ class RadarController extends Controller
      */
     public function edit($id)
     {
-
-        $radar = Radar::withTrashed()->find($id);
+        $radar = $this->radarRepository->showRadar($id);
 
         if (!$radar->trashed()) {
 
@@ -89,49 +96,81 @@ class RadarController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @param $id
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int                      $id
-     *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function update(Request $request, $id)
+    public function update($id)
     {
-        $radar = Radar::find($id);
-        $radar->number = $request->get('number');
-        $radar->distance = $request->get('distance');
-        $radar->time = $request->get('time');
-        $radar->save();
 
+        $this->radarRepository->updateRadar($id);
         return redirect(route('radars.index'));
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param $id
      *
-     * @param  int $id
-     *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Exception
      */
     public function destroy($id)
     {
-        $radar = Radar::withTrashed()->find($id);
+        $radar = $this->radarRepository->showRadar($id);
 
         if (!$radar->trashed()) {
             $radar->delete();
         }
 
-
         return redirect(route('radars.index'));
     }
 
+    /**
+     * Restore the specified resource .
+     *
+     * @param  int $id
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function restore($id) {
-        $radar = Radar::withTrashed()->find($id);
-        $radar->restore();
+
+        $this->radarRepository->restore($id);
+        Session::put('trashview', false);
 
         return redirect(route('radars.index'));
 
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function locale() {
+
+        $lang ='lt';
+
+        if(Session::has('language')) {
+            strcmp(Session::get('language'), 'lt') === 0 ? $lang ='en' : $lang ='lt';
+        }
+
+        Session::put('language', $lang);
+
+        return redirect(route('radars.index'));
+    }
+
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function setTrashon() {
+        Session::put('trashview', true);
+
+        return redirect(route('radars.index'));
+    }
+
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function setTrashoff() {
+        Session::put('trashview', false);
+
+        return redirect(route('radars.index'));
+    }
 }

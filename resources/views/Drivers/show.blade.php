@@ -3,7 +3,7 @@
 
 @section('content')
 @section('title')
-    Vairuotojas: Id  {!!$driver->id!!}, Vardas:  {{$driver->name}}, Adresas:  {{$driver->city}}
+    {{trans_choice(__('common.driver'), 1, ['value' => 1])}}: Id  {!!$driver->id!!}, {{ __('common.name')}}:  {{$driver->name}}, {{ __('common.city')}}:  {{$driver->city}}
 @stop
 
 @endsection

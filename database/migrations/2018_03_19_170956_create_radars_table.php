@@ -19,8 +19,8 @@ class CreateRadarsTable extends Migration
             $table->string('number');
             $table->float('distance');
             $table->float('time');
-            $table->integer('driver_id')->nullable();
-
+            $table->unsignedInteger('driver_id')->nullable();
+            $table->foreign('driver_id')->references('id')->on('drivers');
         });
     }
 

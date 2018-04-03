@@ -3,6 +3,8 @@
 /public/storage
 /storage/*.key
 /vendor
+/app/Mail
+/resources/views/mails
 /.idea
 /.vscode
 /.vagrant
